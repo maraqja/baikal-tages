@@ -141,6 +141,5 @@ CREATE UNIQUE INDEX path_property ON propertystorage (path(600), name(100));
 CREATE TABLE users (
     id INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     username VARBINARY(50),
-    digesta1 VARBINARY(32),
     UNIQUE(username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

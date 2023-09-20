@@ -80,13 +80,15 @@ class Standard extends \Baikal\Model\Config {
         $oMorpho->add(new \Formal\Element\Listbox([
             "prop"    => "dav_auth_type",
             "label"   => "WebDAV authentication type",
-            "options" => ["Bearer", "Digest", "Basic", "Apache", ],
+            "options" => ["Bearer"],
         ]));
 
         $oMorpho->add(new \Formal\Element\Text([
             "prop"  => "oauth_url",
             "label" => "OAuth url",
-            "help" => "Paste here url for validating JWT"
+            "help" => 'Paste here url for validating JWT <br>
+            Your ouath provider must return object with property "preferred_username" in response body <br>
+            Example endpoint for validatiing jwt for keycloak: [GET] https://{{keycloakHost}}/realms/{{keycloakRealm}}/protocol/openid-connect/userinfo'
         ]));
 
 
@@ -107,6 +109,10 @@ class Standard extends \Baikal\Model\Config {
             error_log('Error reading baikal.yaml file : ' . $e->getMessage());
         }
 
+        if (!isset($config['system']["oauth_url"]) || trim($config['system']["oauth_url"]) === "") {
+            # No oauth_url set (Form is used in install tool), so oauth_url is required as it has to be defined
+            $oMorpho->element("oauth_url")->setOption("validation", "required");
+        }
         if (!isset($config['system']["admin_passwordhash"]) || trim($config['system']["admin_passwordhash"]) === "") {
             # No password set (Form is used in install tool), so password is required as it has to be defined
             $oMorpho->element("admin_passwordhash")->setOption("validation", "required");

@@ -49,7 +49,7 @@ class BearerAuth extends \Sabre\DAV\Auth\Backend\AbstractBearer
     }
 
     function validateBearerToken($bearerToken) {
-        $response = $this->httpClient->request('GET', $this->oauthURL, [ // https://keycloak.com-dev.int.rolfcorp.ru/realms/COREAPP-DEV/protocol/openid-connect/userinfo
+        $response = $this->httpClient->request('GET', $this->oauthURL, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $bearerToken,
             ],
@@ -57,21 +57,38 @@ class BearerAuth extends \Sabre\DAV\Auth\Backend\AbstractBearer
 
         if ($response->getStatusCode() === 200) {
             $content = json_decode($response->getContent());
-            // Обработка содержимого ответа
             $username = $content->preferred_username;
-            $email = $content->email;
+
+
+            $stmt = $this->pdo->prepare('SELECT username FROM users WHERE username = ?');
+            $stmt->execute([$username]);
+            $result = $stmt->fetchAll();
+    
+            if (!count($result)) {
+                $email = $content->email;
+                $stmt = $this->pdo->prepare('
+                INSERT INTO users (username)
+                VALUES (?);
+            
+                INSERT INTO principals (uri, email, displayname)
+                SELECT ?, ?, ?
+                WHERE NOT EXISTS (SELECT 1 FROM principals WHERE uri = ?);
+            ');
+            
+            $stmt->execute([
+                $username,
+                'principals/'.$username,
+                $email,
+                $username,
+                'principals/'.$username,
+            ]);   
+            }
+            
             return 'principals/' . $username;
         } else {
-            // Обработка ошибки
             return false;
         }
 
-
-       
-        // if (!$user) {
-        //     return [false, 'Error msg from keycloak'];
-        // } 
-        // return [true, 'principals/dmorkulev']
 
     }
 
