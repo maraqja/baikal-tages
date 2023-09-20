@@ -4,7 +4,12 @@ system:
     card_enabled: true
     cal_enabled: true
     invite_from: 'noreply@localhost'
-    dav_auth_type: 'Digest'
+    dav_auth_type: 'Bearer_with_Basic'
+    oauth_url_validateJWT: ''
+    username_oauth_field: ''
+    email_oauth_field: ''
+    oauth_url_validateUserPass: ''
+    client_id_oauth: ''
     admin_passwordhash: 5fe794627e1f841f8debba065e2c807a
     failed_access_message: 'user %u authentication failure for Baikal'
     auth_realm: BaikalDAV
@@ -12,7 +17,7 @@ system:
 database:
     encryption_key: 5d3f0fa0192e3058ea70f1bb20924add
     sqlite_file: "absolute/path/to/Specific/db/db.sqlite"
-    mysql: true
+    mysql: false
     mysql_host: 'localhost'
     mysql_dbname: 'baikal'
     mysql_username: 'baikal'

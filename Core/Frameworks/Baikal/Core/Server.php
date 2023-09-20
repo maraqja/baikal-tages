@@ -55,7 +55,6 @@ class Server {
     protected $enableCardDAV;
 
     /**
-     * "Basic" or "Digest".
      *
      * @var string
      */
@@ -82,6 +81,15 @@ class Server {
      */
     protected $baseUri;
 
+    protected $oauthUrlValidateJwt;
+    protected $oauthUsernameField;
+    protected $oauthEmailField;
+
+
+
+    protected $oauthUrlValidateCredentials;
+    protected $oauthClientId;
+
     /**
      * The sabre/dav Server object.
      *
@@ -99,14 +107,18 @@ class Server {
      * @param PDO $pdo
      * @param string $baseUri
      */
-    function __construct($enableCalDAV, $enableCardDAV, $authType, $authRealm, PDO $pdo, $baseUri) {
+    function __construct($enableCalDAV, $enableCardDAV, $authType, $authRealm, PDO $pdo, $baseUri, $oauthUrlValidateJwt, $oauthUsernameField, $oauthEmailField, $oauthUrlValidateCredentials, $oauthClientId) {
         $this->enableCalDAV = $enableCalDAV;
         $this->enableCardDAV = $enableCardDAV;
         $this->authType = $authType;
         $this->authRealm = $authRealm;
         $this->pdo = $pdo;
         $this->baseUri = $baseUri;
-
+        $this->oauthUrlValidateJwt = $oauthUrlValidateJwt;
+        $this->oauthUsernameField = $oauthUsernameField;
+        $this->oauthEmailField = $oauthEmailField;
+        $this->oauthUrlValidateCredentials = $oauthUrlValidateCredentials;
+        $this->oauthClientId = $oauthClientId;
         $this->initServer();
     }
 
@@ -130,15 +142,7 @@ class Server {
         } catch (\Exception $e) {
             error_log('Error reading baikal.yaml file : ' . $e->getMessage());
         }
-
-        if ($this->authType === 'Basic') {
-            $authBackend = new \Baikal\Core\PDOBasicAuth($this->pdo, $this->authRealm);
-        } elseif ($this->authType === 'Apache') {
-            $authBackend = new \Sabre\DAV\Auth\Backend\Apache();
-        } else {
-            $authBackend = new \Sabre\DAV\Auth\Backend\PDO($this->pdo);
-            $authBackend->setRealm($this->authRealm);
-        }
+        $authBackend = new \Baikal\Core\BasicWithBearer($this->pdo, $this->authRealm, $this->oauthUrlValidateJwt, $this->oauthUsernameField, $this->oauthEmailField, $this->oauthUrlValidateCredentials, $this->oauthClientId);
         $principalBackend = new \Sabre\DAVACL\PrincipalBackend\PDO($this->pdo);
 
         $nodes = [
@@ -194,7 +198,7 @@ class Server {
         if ($e instanceof \Sabre\DAV\Exception\NotAuthenticated) {
             // Applications may make their first call without auth so don't log these attempts
             // Pattern from sabre/dav/lib/DAV/Auth/Backend/AbstractDigest.php
-            if (!preg_match("/No 'Authorization: (Basic|Digest)' header found./", $e->getMessage())) {
+            if (!preg_match("/No 'Authorization: Basic or Bearer' header found./", $e->getMessage())) {
                 $config = Yaml::parseFile(PROJECT_PATH_CONFIG . "baikal.yaml");
                 if (isset($config['system']["failed_access_message"]) && $config['system']["failed_access_message"] !== "") {
                     $log_msg = str_replace("%u", "(name stripped-out)", $config['system']["failed_access_message"]);
