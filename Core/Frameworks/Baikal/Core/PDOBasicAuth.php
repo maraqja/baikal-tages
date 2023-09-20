@@ -11,7 +11,9 @@ namespace Baikal\Core;
  * @author Lukasz Janyst <ljanyst@buggybrain.net>
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
-class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBasic {
+class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBasic 
+// class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBearer
+{
     /**
      * Reference to PDO connection.
      *
@@ -63,6 +65,8 @@ class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBasic {
      *
      * @return bool
      */
+
+
     function validateUserPass($username, $password) {
         $stmt = $this->pdo->prepare('SELECT username, digesta1 FROM ' . $this->tableName . ' WHERE username = ?');
         $stmt->execute([$username]);
@@ -81,4 +85,8 @@ class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBasic {
 
         return false;
     }
+
+
+
+    
 }

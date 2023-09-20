@@ -130,8 +130,9 @@ class Server {
         } catch (\Exception $e) {
             error_log('Error reading baikal.yaml file : ' . $e->getMessage());
         }
-
-        if ($this->authType === 'Basic') {
+        if ($this->authType === 'Bearer') {
+            $authBackend = new \Baikal\Core\BearerAuth($this->pdo, $config['system']['oauth_url']);
+        } elseif ($this->authType === 'Basic') {
             $authBackend = new \Baikal\Core\PDOBasicAuth($this->pdo, $this->authRealm);
         } elseif ($this->authType === 'Apache') {
             $authBackend = new \Sabre\DAV\Auth\Backend\Apache();

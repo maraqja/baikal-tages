@@ -33,10 +33,11 @@ class Standard extends \Baikal\Model\Config {
     # Default values
     protected $aData = [
         "configured_version"    => BAIKAL_VERSION,
-        "timezone"              => "Europe/Paris",
+        "timezone"              => "Europe/Moscow",
         "card_enabled"          => true,
         "cal_enabled"           => true,
-        "dav_auth_type"         => "Digest",
+        "dav_auth_type"         => "Bearer",
+        "oauth_url"             => "",
         "admin_passwordhash"    => "",
         "failed_access_message" => "user %u authentication failure for Baikal",
         // While not editable as will change admin & any existing user passwords,
@@ -79,8 +80,15 @@ class Standard extends \Baikal\Model\Config {
         $oMorpho->add(new \Formal\Element\Listbox([
             "prop"    => "dav_auth_type",
             "label"   => "WebDAV authentication type",
-            "options" => ["Digest", "Basic", "Apache"],
+            "options" => ["Bearer", "Digest", "Basic", "Apache", ],
         ]));
+
+        $oMorpho->add(new \Formal\Element\Text([
+            "prop"  => "oauth_url",
+            "label" => "OAuth url",
+            "help" => "Paste here url for validating JWT"
+        ]));
+
 
         $oMorpho->add(new \Formal\Element\Password([
             "prop"  => "admin_passwordhash",
