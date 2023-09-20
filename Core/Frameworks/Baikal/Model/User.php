@@ -36,7 +36,6 @@ class User extends \Flake\Core\Model\Db {
 
     protected $aData = [
         "username" => "",
-        "digesta1" => "",
     ];
 
     protected $oIdentityPrincipal = null;
@@ -79,10 +78,7 @@ class User extends \Flake\Core\Model\Db {
     }
 
     function get($sPropName) {
-        if ($sPropName === "password" || $sPropName === "passwordconfirm") {
-            # Special handling for password and passwordconfirm
-            return "";
-        }
+      
 
         try {
             # does the property exist on the model object ?
@@ -100,18 +96,6 @@ class User extends \Flake\Core\Model\Db {
     }
 
     function set($sPropName, $sPropValue) {
-        if ($sPropName === "password" || $sPropName === "passwordconfirm") {
-            # Special handling for password and passwordconfirm
-
-            if ($sPropName === "password" && $sPropValue !== "") {
-                parent::set(
-                    "digesta1",
-                    $this->getPasswordHashForPassword($sPropValue)
-                );
-            }
-
-            return $this;
-        }
 
         try {
             # does the property exist on the model object ?
@@ -231,36 +215,12 @@ class User extends \Flake\Core\Model\Db {
             "validation" => "required,email",
         ]));
 
-        $oMorpho->add(new \Formal\Element\Password([
-            "prop"  => "password",
-            "label" => "Password",
-        ]));
-
-        $oMorpho->add(new \Formal\Element\Password([
-            "prop"       => "passwordconfirm",
-            "label"      => "Confirm password",
-            "validation" => "sameas:password",
-        ]));
 
         if ($this->floating()) {
             $oMorpho->element("username")->setOption("help", "May be an email, but not forcibly.");
-            $oMorpho->element("password")->setOption("validation", "required");
         } else {
-            $sNotice = "-- Leave empty to keep current password --";
             $oMorpho->element("username")->setOption("readonly", true);
 
-            $oMorpho->element("password")->setOption("popover", [
-                "title"   => "Password",
-                "content" => "Write something here only if you want to change the user password.",
-            ]);
-
-            $oMorpho->element("passwordconfirm")->setOption("popover", [
-                "title"   => "Confirm password",
-                "content" => "Write something here only if you want to change the user password.",
-            ]);
-
-            $oMorpho->element("password")->setOption("placeholder", $sNotice);
-            $oMorpho->element("passwordconfirm")->setOption("placeholder", $sNotice);
         }
 
         return $oMorpho;
@@ -278,13 +238,4 @@ class User extends \Flake\Core\Model\Db {
         return "glyph2x-user";
     }
 
-    function getPasswordHashForPassword($sPassword) {
-        try {
-            $config = Yaml::parseFile(PROJECT_PATH_CONFIG . "baikal.yaml");
-        } catch (\Exception $e) {
-            error_log('Error reading baikal.yaml file : ' . $e->getMessage());
-        }
-
-        return md5($this->get("username") . ':' . $config['system']['auth_realm'] . ':' . $sPassword);
-    }
 }
