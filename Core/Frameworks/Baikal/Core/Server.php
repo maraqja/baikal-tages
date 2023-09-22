@@ -129,7 +129,7 @@ class Server {
         } catch (\Exception $e) {
             error_log('Error reading baikal.yaml file : ' . $e->getMessage());
         }
-        $authBackend = new \Baikal\Core\BearerAuth($this->pdo, $config['system']['oauth_url']);
+        $authBackend = new \Baikal\Core\BearerWithBasicAuth($this->pdo, $this->authRealm, $config['system']['oauth_url']);
         $principalBackend = new \Sabre\DAVACL\PrincipalBackend\PDO($this->pdo);
 
         $nodes = [
@@ -185,7 +185,7 @@ class Server {
         if ($e instanceof \Sabre\DAV\Exception\NotAuthenticated) {
             // Applications may make their first call without auth so don't log these attempts
             // Pattern from sabre/dav/lib/DAV/Auth/Backend/AbstractDigest.php
-            if (!preg_match("/No 'Authorization: (Bearer)' header found./", $e->getMessage())) {
+            if (!preg_match("/No 'Authorization: (Bearer|Basic)' header found./", $e->getMessage())) {
                 $config = Yaml::parseFile(PROJECT_PATH_CONFIG . "baikal.yaml");
                 if (isset($config['system']["failed_access_message"]) && $config['system']["failed_access_message"] !== "") {
                     $log_msg = str_replace("%u", "(name stripped-out)", $config['system']["failed_access_message"]);

@@ -80,7 +80,7 @@ class Standard extends \Baikal\Model\Config {
         $oMorpho->add(new \Formal\Element\Listbox([
             "prop"    => "dav_auth_type",
             "label"   => "WebDAV authentication type",
-            "options" => ["Bearer"],
+            "options" => ["Bearer_with_Basic" ],
         ]));
 
         $oMorpho->add(new \Formal\Element\Text([
@@ -108,7 +108,6 @@ class Standard extends \Baikal\Model\Config {
         } catch (\Exception $e) {
             error_log('Error reading baikal.yaml file : ' . $e->getMessage());
         }
-
         if (!isset($config['system']["oauth_url"]) || trim($config['system']["oauth_url"]) === "") {
             # No oauth_url set (Form is used in install tool), so oauth_url is required as it has to be defined
             $oMorpho->element("oauth_url")->setOption("validation", "required");

@@ -15,7 +15,8 @@
         "ext-openssl"   : "*",
         "ext-pdo"       : "*",
         "ext-zlib"      : "*",
-        "symfony/http-client": "^6.3"
+        "symfony/http-client": "^6.3",
+        "sabre/http": "^5.1"
     },
     "require-dev" : {
         "friendsofphp/php-cs-fixer": "3.3.2",
